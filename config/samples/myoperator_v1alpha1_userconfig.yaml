@@ -1,0 +1,9 @@
+apiVersion: myoperator.01cloud.io/v1alpha1
+kind: UserConfig
+metadata:
+  labels:
+    app.kubernetes.io/name: lab
+    app.kubernetes.io/managed-by: kustomize
+  name: userconfig-sample
+spec:
+  # TODO(user): Add fields here

@@ -1,0 +1,52 @@
+apiVersion: myoperator.01cloud.io/v1alpha1
+kind: UserConfig
+metadata:
+  name: readonly-user
+spec:
+  identity:
+    username: readonly-user
+    contact: viewer@example.com
+    groups:
+      - viewers
+    labels:
+      - tier-0
+      - department-business
+
+  permissions:
+    resources:
+      - resource: deployment
+        operation: R
+      - resource: service
+        operation: R
+      - resource: configmap
+        operation: R
+      - resource: pods
+        operation: R
+      - resource: logs
+        operation: R
+
+  resourceQuota:
+    cpu: 1
+    memory: 2Gi
+    pods: 5
+
+  limitRange:
+    limits:
+      - type: Container
+        max:
+          cpu: 500m
+          memory: 1Gi
+        default:
+          cpu: 100m
+          memory: 256Mi
+        defaultRequest:
+          cpu: 50m
+          memory: 128Mi
+
+  networkPolicy:
+    - allowTrafficFrom:
+        namespaces:
+          - kubernetes.io/metadata.name: monitoring-namespace
+
+  serviceAccounts:
+    - name: readonly-service-account

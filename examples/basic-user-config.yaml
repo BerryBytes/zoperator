@@ -1,0 +1,54 @@
+apiVersion: myoperator.01cloud.io/v1alpha1
+kind: UserConfig
+metadata:
+  name: developer-basic
+spec:
+  identity:
+    username: developer-basic
+    contact: dev@example.com
+    groups:
+      - developers
+    labels:
+      - tier-1
+      - department-engineering
+
+  permissions:
+    resources:
+      - resource: deployment
+        operation: CRUD
+      - resource: service
+        operation: CR
+      - resource: configmap
+        operation: CRUD
+      - resource: pods
+        operation: CR
+      - resource: logs
+        operation: R
+
+  resourceQuota:
+    cpu: "2"
+    memory: 4Gi
+    pods: "10"
+    services: "5"
+    persistentvolumeclaims: "5"
+
+  limitRange:
+    limits:
+      - type: Container
+        min:
+          cpu: 50m
+          memory: 64Mi
+        max:
+          cpu: "1"
+          memory: 2Gi
+        default:
+          cpu: 100m
+          memory: 256Mi
+        defaultRequest:
+          cpu: 50m
+          memory: 128Mi
+
+  serviceAccounts:
+    - name: developer-service-account
+      imagePullSecrets:
+        - docker-registry-secret

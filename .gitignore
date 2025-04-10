@@ -1,0 +1,14 @@
+bin/
+cover.out
+cover.html
+venv/
+mycert.pem
+sealed-secret.yaml
+secrets.yaml
+test-user.yaml
+config-test-user
+BE-test.yaml
+FE-test.yaml
+dist/
+txt.txt
+error.log

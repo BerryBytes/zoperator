@@ -1,0 +1,575 @@
+---
+apiVersion: apiextensions.k8s.io/v1
+kind: CustomResourceDefinition
+metadata:
+  annotations:
+    controller-gen.kubebuilder.io/version: v0.16.4
+  name: userconfigs.myoperator.01cloud.io
+spec:
+  group: myoperator.01cloud.io
+  names:
+    kind: UserConfig
+    listKind: UserConfigList
+    plural: userconfigs
+    singular: userconfig
+  scope: Cluster
+  versions:
+  - additionalPrinterColumns:
+    - jsonPath: .status.state
+      name: Status
+      type: string
+    - jsonPath: .metadata.creationTimestamp
+      name: Age
+      type: date
+    - jsonPath: .spec.identity.username
+      name: Username
+      type: string
+    name: v1alpha1
+    schema:
+      openAPIV3Schema:
+        properties:
+          apiVersion:
+            description: |-
+              APIVersion defines the versioned schema of this representation of an object.
+              Servers should convert recognized schemas to the latest internal value, and
+              may reject unrecognized values.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#resources
+            type: string
+          kind:
+            description: |-
+              Kind is a string value representing the REST resource this object represents.
+              Servers may infer this from the endpoint the client submits requests to.
+              Cannot be updated.
+              In CamelCase.
+              More info: https://git.k8s.io/community/contributors/devel/sig-architecture/api-conventions.md#types-kinds
+            type: string
+          metadata:
+            type: object
+          spec:
+            description: UserConfigSpec defines the desired state of UserConfig
+            properties:
+              identity:
+                description: Identity contains the user identification and group membership
+                  details
+                properties:
+                  contact:
+                    description: Contact is the user's email address for communication.
+                    pattern: ^[a-zA-Z._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$
+                    type: string
+                  groups:
+                    description: Groups represent user's group membership with predefined
+                      roles
+                    items:
+                      type: string
+                    type: array
+                  labels:
+                    description: Labels are optional additional tags for user classification.
+                    items:
+                      type: string
+                    type: array
+                  username:
+                    description: Username is the user's unique identifier, must be
+                      DNS-compatible.
+                    maxLength: 63
+                    minLength: 3
+                    pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                    type: string
+                required:
+                - contact
+                - username
+                type: object
+              limitRange:
+                description: LimitRange defines the limits of resource usable by the
+                  container.
+                properties:
+                  limits:
+                    items:
+                      description: LimitRangeLimit defines the limit range of resource
+                        usable by container
+                      properties:
+                        default:
+                          description: default resource cap assigned to the container
+                            if not assigned any
+                          properties:
+                            cpu:
+                              description: |-
+                                CPU specifies the CPU resource limit and must be a valid CPU resource quantity
+                                sample values: 100m, 1, 1.5
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                            memory:
+                              description: |-
+                                Memory specifies the memory resource limit and must be a valid memory resource quantity
+                                sample values: 100Mi, 1Gi, 1.5Gi
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                          type: object
+                        defaultRequest:
+                          description: default usable resource allocated to container
+                            can request if not assigned any
+                          properties:
+                            cpu:
+                              description: |-
+                                CPU specifies the CPU resource limit and must be a valid CPU resource quantity
+                                sample values: 100m, 1, 1.5
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                            memory:
+                              description: |-
+                                Memory specifies the memory resource limit and must be a valid memory resource quantity
+                                sample values: 100Mi, 1Gi, 1.5Gi
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                          type: object
+                        max:
+                          description: Maximum allowed resource a container can request
+                            or limit. Cannot be assigned below this.
+                          properties:
+                            cpu:
+                              description: |-
+                                CPU specifies the CPU resource limit and must be a valid CPU resource quantity
+                                sample values: 100m, 1, 1.5
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                            memory:
+                              description: |-
+                                Memory specifies the memory resource limit and must be a valid memory resource quantity
+                                sample values: 100Mi, 1Gi, 1.5Gi
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                          type: object
+                        min:
+                          description: Smallest allowed resource a container can request
+                            or limit. Cannot be assigned above this
+                          properties:
+                            cpu:
+                              description: |-
+                                CPU specifies the CPU resource limit and must be a valid CPU resource quantity
+                                sample values: 100m, 1, 1.5
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                            memory:
+                              description: |-
+                                Memory specifies the memory resource limit and must be a valid memory resource quantity
+                                sample values: 100Mi, 1Gi, 1.5Gi
+                              pattern: ^([+-]?[0-9.]+)([eEinumkKMGTP]*[-+]?[0-9]*)$
+                              type: string
+                          type: object
+                        type:
+                          description: Type specifies the type of resource, which
+                            can be either "Container" or "Pod", and in case of Pod
+                            Default resources are not set as they are not applicable
+                          enum:
+                          - Container
+                          - Pod
+                          type: string
+                      required:
+                      - type
+                      type: object
+                    type: array
+                type: object
+              networkPolicy:
+                description: NetworkPolicy defines the network policy configuration
+                items:
+                  description: NetworkPolicy defines the network policy configuration
+                  properties:
+                    allowTrafficFrom:
+                      description: |-
+                        AllowTrafficFrom specifies the allowed traffic sources
+                        Example:
+                        - allowTrafficFrom:
+                            namespaces:
+                              - kubernetes.io/metadata.name: frontend-namespace  # Allow traffic from namespace-a
+                            pods:
+                              - app: frontend  # Allow traffic from pods labeled 'frontend'
+                      properties:
+                        namespaces:
+                          description: Namespaces specifies the allowed namespaces
+                          items:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          type: array
+                        pods:
+                          description: Pods specifies the allowed pods
+                          items:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          type: array
+                        ports:
+                          description: Ports specifies the allowed network ports
+                          items:
+                            description: NetworkPolicyPort defines a port and protocol
+                              for network policies
+                            properties:
+                              port:
+                                description: Port number for network policy, through
+                                  which traffic is allowed
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              protocol:
+                                default: TCP
+                                description: Protocol for network traffic (defaults
+                                  to TCP)
+                                enum:
+                                - TCP
+                                - UDP
+                                - SCTP
+                                type: string
+                            required:
+                            - port
+                            type: object
+                          type: array
+                      type: object
+                    allowTrafficTo:
+                      description: |-
+                        AllowTrafficTo specifies the allowed traffic destinations
+                        Example:
+                        - allowTrafficTo:
+                            namespaces:
+                              - kubernetes.io/metadata.name: test-user-namespace # Allow traffic to namespace-b
+                            pods:
+                              - app: backend  # Allow traffic to pods labeled 'backend'
+                           ports:
+                              - port: 80
+                      properties:
+                        namespaces:
+                          description: Namespaces specifies the allowed namespaces
+                          items:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          type: array
+                        pods:
+                          description: Pods specifies the allowed pods
+                          items:
+                            additionalProperties:
+                              type: string
+                            type: object
+                          type: array
+                        ports:
+                          description: Ports specifies the allowed network ports
+                          items:
+                            description: NetworkPolicyPort defines a port and protocol
+                              for network policies
+                            properties:
+                              port:
+                                description: Port number for network policy, through
+                                  which traffic is allowed
+                                maximum: 65535
+                                minimum: 1
+                                type: integer
+                              protocol:
+                                default: TCP
+                                description: Protocol for network traffic (defaults
+                                  to TCP)
+                                enum:
+                                - TCP
+                                - UDP
+                                - SCTP
+                                type: string
+                            required:
+                            - port
+                            type: object
+                          type: array
+                      type: object
+                  type: object
+                type: array
+              permissions:
+                description: Permissions defines the access level for specific Kubernetes
+                  resources
+                properties:
+                  resources:
+                    description: Resources is a list of resource permissions granted
+                      to the user.
+                    items:
+                      description: ResourcePermission defines access level for specific
+                        Kubernetes resources
+                      properties:
+                        operation:
+                          description: |-
+                            Operation specifies the allowed operations on the resource
+                            Can be a combination of C(create), R(read), U(update), D(delete)
+                            or "*" for full access
+                            NOTE: If using kubectl apply, Create action requires GET permission
+                            https://spacelift.io/blog/kubectl-apply-vs-create
+                          maxLength: 4
+                          pattern: ^[CRUD*]+$
+                          type: string
+                        resource:
+                          description: Resource specifies the type of Kubernetes resource.
+                          enum:
+                          - deployment
+                          - service
+                          - secret
+                          - pods
+                          - configmap
+                          - ingress
+                          - persistentvolumeclaim
+                          - logs
+                          - scaledeployment
+                          - scalereplicaset
+                          type: string
+                      required:
+                      - operation
+                      - resource
+                      type: object
+                    minItems: 1
+                    type: array
+                required:
+                - resources
+                type: object
+              resourceQuota:
+                description: ResourceQuotas defines the resource quota configuration
+                  to the namespace
+                properties:
+                  cpu:
+                    description: CPU quota for the namespace
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  ephemeral-storage:
+                    description: Ephemeral storage quota
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  limits.cpu:
+                    description: Limit quotas for CPU
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  limits.ephemeral-storage:
+                    description: Limit quotas for ephemeral storage
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  limits.memory:
+                    description: Limit quotas for memory
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  memory:
+                    description: Memory quota for the namespace
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  persistentvolumeclaims:
+                    description: Maximum number of persistent volume claims
+                    pattern: ^[0-9]+$
+                    type: string
+                  pods:
+                    description: Maximum number of pods
+                    pattern: ^[0-9]+$
+                    type: string
+                  replicationcontrollers:
+                    description: Maximum number of replication controllers
+                    pattern: ^[0-9]+$
+                    type: string
+                  requests.configmaps:
+                    description: Maximum number of config maps
+                    pattern: ^[0-9]+$
+                    type: string
+                  requests.cpu:
+                    description: Request quotas for CPU
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  requests.ephemeral-storage:
+                    description: Request quotas for ephemeral storage
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  requests.memory:
+                    description: Request quotas for memory
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  requests.storage:
+                    description: Request quotas for storage
+                    pattern: ^([0-9]+)([mKMGTP]*i?)$
+                    type: string
+                  secrets:
+                    description: Maximum number of secrets
+                    pattern: ^[0-9]+$
+                    type: string
+                  services:
+                    description: Maximum number of services
+                    pattern: ^[0-9]+$
+                    type: string
+                  services.loadbalancers:
+                    description: Maximum number of load balancer services
+                    pattern: ^[0-9]+$
+                    type: string
+                  services.nodeports:
+                    description: Maximum number of node port services
+                    pattern: ^[0-9]+$
+                    type: string
+                type: object
+              secrets:
+                description: Secrets defines the secrets configuration
+                items:
+                  description: Secret defines the configuration for a secret
+                  properties:
+                    externalSecret:
+                      description: |-
+                        ExternalSecret is used to define external secrets from other providers
+                        NOTE: THIS IS AN UPCOMING FEATURE. SO IT IS NOT YET IMPLEMENTED
+                      properties:
+                        credentials:
+                          description: Credentials contains the credentials for accessing
+                            the external secret provider
+                          properties:
+                            accessKey:
+                              description: AccessKey is the access key for the external
+                                secret provider
+                              type: string
+                            secretKey:
+                              description: SecretKey is the secret key for the external
+                                secret provider
+                              type: string
+                          required:
+                          - accessKey
+                          - secretKey
+                          type: object
+                        endpoint:
+                          description: Endpoint specifies the endpoint for the external
+                            secret provider
+                          pattern: ^https?://[a-zA-Z0-9._-]+(:[0-9]+)?(/.*)?$
+                          type: string
+                        provider:
+                          description: Provider specifies the external secret provider
+                          enum:
+                          - aws
+                          - gcp
+                          - azure
+                          - vault
+                          type: string
+                        secretPath:
+                          description: SecretPath specifies the path to the secret
+                            in the external Provider
+                          pattern: ^/([a-zA-Z0-9._-]+/)*[a-zA-Z0-9._-]+$
+                          type: string
+                      required:
+                      - credentials
+                      - endpoint
+                      - provider
+                      - secretPath
+                      type: object
+                    name:
+                      description: Name is the name of the secret
+                      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                      type: string
+                    sealedSecret:
+                      description: SealedSecret is used to define sealed secrets
+                      properties:
+                        encryptedData:
+                          additionalProperties:
+                            type: string
+                          description: EncryptedData contains the encrypted data for
+                            the sealed secret
+                          type: object
+                      required:
+                      - encryptedData
+                      type: object
+                    type:
+                      description: Type specifies the type of secret
+                      enum:
+                      - sealed
+                      - external
+                      type: string
+                  required:
+                  - name
+                  - type
+                  type: object
+                type: array
+              serviceAccounts:
+                description: ServiceAccounts defines the service accounts configuration
+                items:
+                  description: ServiceAccount defines the service account configuration
+                  properties:
+                    imagePullSecrets:
+                      description: ImagePullSecrets specifies the image pull secrets
+                        for the service account
+                      items:
+                        type: string
+                      type: array
+                    name:
+                      description: Name is the name of the service account
+                      pattern: ^[a-z0-9]([-a-z0-9]*[a-z0-9])?$
+                      type: string
+                  required:
+                  - name
+                  type: object
+                type: array
+            required:
+            - identity
+            - permissions
+            type: object
+          status:
+            description: UserConfigStatus defines the observed state of UserConfig
+            properties:
+              conditions:
+                items:
+                  description: Condition contains details for one aspect of the current
+                    state of this API Resource.
+                  properties:
+                    lastTransitionTime:
+                      description: |-
+                        lastTransitionTime is the last time the condition transitioned from one status to another.
+                        This should be when the underlying condition changed.  If that is not known, then using the time when the API field changed is acceptable.
+                      format: date-time
+                      type: string
+                    message:
+                      description: |-
+                        message is a human readable message indicating details about the transition.
+                        This may be an empty string.
+                      maxLength: 32768
+                      type: string
+                    observedGeneration:
+                      description: |-
+                        observedGeneration represents the .metadata.generation that the condition was set based upon.
+                        For instance, if .metadata.generation is currently 12, but the .status.conditions[x].observedGeneration is 9, the condition is out of date
+                        with respect to the current state of the instance.
+                      format: int64
+                      minimum: 0
+                      type: integer
+                    reason:
+                      description: |-
+                        reason contains a programmatic identifier indicating the reason for the condition's last transition.
+                        Producers of specific condition types may define expected values and meanings for this field,
+                        and whether the values are considered a guaranteed API.
+                        The value should be a CamelCase string.
+                        This field may not be empty.
+                      maxLength: 1024
+                      minLength: 1
+                      pattern: ^[A-Za-z]([A-Za-z0-9_,:]*[A-Za-z0-9_])?$
+                      type: string
+                    status:
+                      description: status of the condition, one of True, False, Unknown.
+                      enum:
+                      - "True"
+                      - "False"
+                      - Unknown
+                      type: string
+                    type:
+                      description: type of condition in CamelCase or in foo.example.com/CamelCase.
+                      maxLength: 316
+                      pattern: ^([a-z0-9]([-a-z0-9]*[a-z0-9])?(\.[a-z0-9]([-a-z0-9]*[a-z0-9])?)*/)?(([A-Za-z0-9][-A-Za-z0-9_.]*)?[A-Za-z0-9])$
+                      type: string
+                  required:
+                  - lastTransitionTime
+                  - message
+                  - reason
+                  - status
+                  - type
+                  type: object
+                type: array
+              lastUpdated:
+                format: date-time
+                type: string
+              state:
+                description: State represents the current state of the UserConfig
+                enum:
+                - Pending
+                - Active
+                - Error
+                type: string
+            type: object
+        type: object
+    served: true
+    storage: true
+    subresources:
+      status: {}

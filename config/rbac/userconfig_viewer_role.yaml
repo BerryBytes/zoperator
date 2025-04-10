@@ -1,0 +1,23 @@
+# permissions for end users to view userconfigs.
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app.kubernetes.io/name: lab
+    app.kubernetes.io/managed-by: kustomize
+  name: userconfig-viewer-role
+rules:
+- apiGroups:
+  - myoperator.01cloud.io
+  resources:
+  - userconfigs
+  verbs:
+  - get
+  - list
+  - watch
+- apiGroups:
+  - myoperator.01cloud.io
+  resources:
+  - userconfigs/status
+  verbs:
+  - get

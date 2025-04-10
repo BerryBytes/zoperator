@@ -1,0 +1,122 @@
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  name: manager-role
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - configmaps
+  - limitranges
+  - namespaces
+  - persistentvolumeclaims
+  - persistentvolumes
+  - pods
+  - pods/log
+  - resourcequotas
+  - secrets
+  - serviceaccounts
+  - serviceaccounts/token
+  - services
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - ""
+  resources:
+  - persistentvolumeclaims/status
+  - persistentvolumes/status
+  - resourcequotas/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - apps
+  resources:
+  - daemonsets
+  - daemonsets/scale
+  - deployments
+  - deployments/scale
+  - replicasets
+  - replicasets/scale
+  - statefulsets
+  - statefulsets/scale
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - bitnami.com
+  resources:
+  - sealedsecrets
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - myoperator.01cloud.io
+  resources:
+  - userconfigs
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - myoperator.01cloud.io
+  resources:
+  - userconfigs/finalizers
+  verbs:
+  - update
+- apiGroups:
+  - myoperator.01cloud.io
+  resources:
+  - userconfigs/status
+  verbs:
+  - get
+  - patch
+  - update
+- apiGroups:
+  - networking.k8s.io
+  resources:
+  - ingresses
+  - networkpolicies
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch
+- apiGroups:
+  - rbac.authorization.k8s.io
+  resources:
+  - rolebindings
+  - roles
+  verbs:
+  - create
+  - delete
+  - get
+  - list
+  - patch
+  - update
+  - watch

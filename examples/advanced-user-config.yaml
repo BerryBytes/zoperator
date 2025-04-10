@@ -1,0 +1,102 @@
+apiVersion: myoperator.01cloud.io/v1alpha1
+kind: UserConfig
+metadata:
+  name: devops-advanced
+spec:
+  identity:
+    username: devops-advanced
+    contact: devops@example.com
+    groups:
+      - devops
+      - sre
+    labels:
+      - tier-2
+      - department-operations
+
+  permissions:
+    resources:
+      - resource: deployment
+        operation: CRUD
+      - resource: service
+        operation: CRUD
+      - resource: configmap
+        operation: CRUD
+      - resource: pods
+        operation: CRUD
+      - resource: logs
+        operation: R
+      - resource: secret
+        operation: CRUD
+      - resource: ingress
+        operation: CRUD
+      - resource: persistentvolumeclaim
+        operation: CRUD
+      - resource: scaledeployment
+        operation: U
+      - resource: scalereplicaset
+        operation: U
+
+  resourceQuota:
+    cpu: 8
+    memory: 16Gi
+    ephemeral-storage: 50Gi
+    pods: 30
+    services: 15
+    services.nodeports: 5
+    services.loadbalancers: 2
+    persistentvolumeclaims: 10
+    requests.storage: 100Gi
+    secrets: 20
+    requests.configmaps: 20
+
+  limitRange:
+    limits:
+      - type: Container
+        min:
+          cpu: 100m
+          memory: 128Mi
+        max:
+          cpu: 4
+          memory: 8Gi
+        default:
+          cpu: 200m
+          memory: 512Mi
+        defaultRequest:
+          cpu: 100m
+          memory: 256Mi
+      - type: Pod
+        max:
+          cpu: 8
+          memory: 16Gi
+
+  networkPolicy:
+    - allowTrafficFrom:
+        namespaces:
+          - kubernetes.io/metadata.name: frontend-namespace
+        pods:
+          - app: frontend
+        ports:
+          - port: 80
+            protocol: TCP
+          - port: 443
+            protocol: TCP
+    - allowTrafficTo:
+        namespaces:
+          - kubernetes.io/metadata.name: database-namespace
+        pods:
+          - app: postgres
+          - app: redis
+        ports:
+          - port: 5432
+            protocol: TCP
+          - port: 6379
+            protocol: TCP
+
+  serviceAccounts:
+    - name: devops-service-account
+      imagePullSecrets:
+        - docker-hub-secret
+        - ecr-secret
+    - name: ci-service-account
+      imagePullSecrets:
+        - github-container-registry-secret

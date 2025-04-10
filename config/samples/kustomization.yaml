@@ -1,0 +1,4 @@
+## Append samples of your project ##
+resources:
+- myoperator_v1alpha1_userconfig.yaml
+# +kubebuilder:scaffold:manifestskustomizesamples
