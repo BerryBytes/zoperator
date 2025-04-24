@@ -311,6 +311,7 @@ spec:
                           - logs
                           - scaledeployment
                           - scalereplicaset
+                          - persistentvolume
                           type: string
                       required:
                       - operation

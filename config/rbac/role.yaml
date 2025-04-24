@@ -7,9 +7,17 @@ rules:
 - apiGroups:
   - ""
   resources:
+  - configmap
   - configmaps
+  verbs:
+  - '*'
+- apiGroups:
+  - ""
+  resources:
   - limitranges
   - namespaces
+  - persistentvolume
+  - persistentvolumeclaim
   - persistentvolumeclaims
   - persistentvolumes
   - pods
