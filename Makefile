@@ -64,29 +64,26 @@ vet: ## Run go vet against code.
 test: manifests generate fmt vet envtest ## Run tests.
 	KUBEBUILDER_ASSETS="$(shell $(ENVTEST) use $(ENVTEST_K8S_VERSION) --bin-dir $(LOCALBIN) -p path)" go test -v $$(go list ./... | grep -v /e2e) -coverprofile cover.out
 
-# TODO(user): To use a different vendor for e2e tests, modify the setup under 'tests/e2e'.
-# The default setup assumes Kind is pre-installed and builds/loads the Manager Docker image locally.
-# Prometheus and CertManager are installed by default; skip with:
-# - PROMETHEUS_INSTALL_SKIP=true
-# - CERT_MANAGER_INSTALL_SKIP=true
-.PHONY: test-e2e  ## persist current active cluster
-test-e2e: manifests generate fmt vet ## Run the e2e tests. Expected an isolated environment using Kind.
+.PHONY: test-e2e
+test-e2e: manifests generate fmt vet
 	@command -v kind >/dev/null 2>&1 || { \
 		echo "Kind is not installed. Please install Kind manually."; \
 		exit 1; \
 	}
-	@current_context=$$(kubectl config current-context); \
+	# Store current context if it exists, otherwise set to empty
+	@current_context=$$(kubectl config current-context 2>/dev/null || echo ""); \
 	kind create cluster --name zoperator-test-cluster || { \
 		echo "Failed to create Kind cluster. Please check the Kind installation."; \
 		exit 1; \
 	}
 	kind get kubeconfig --name zoperator-test-cluster > /tmp/zoperator-test-cluster
 	@export KUBECONFIG=/tmp/zoperator-test-cluster; \
-	trap 'kind delete cluster --name zoperator-test-cluster' EXIT; \
+	trap 'kind delete cluster --name zoperator-test-cluster; rm -f /tmp/zoperator-test-cluster' EXIT; \
 	go test ./test/e2e/ -v -ginkgo.v
-	rm /tmp/zoperator-test-cluster
-	kubectl config set-context $${current_context}
-	kubectl config use-context $${current_context}
+	@if [ -n "$${current_context}" ]; then \
+		kubectl config set-context $${current_context}; \
+		kubectl config use-context $${current_context}; \
+	fi
 
 .PHONY: lint
 lint: golangci-lint ## Run golangci-lint linter
