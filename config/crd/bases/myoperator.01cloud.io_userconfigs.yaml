@@ -27,6 +27,8 @@ spec:
     name: v1alpha1
     schema:
       openAPIV3Schema:
+        description: UserConfig is the CRD for managing user configurations in a Kubernetes
+          cluster, defining identity, permissions, secrets, and resource quotas.
         properties:
           apiVersion:
             description: |-
@@ -53,8 +55,7 @@ spec:
                   details
                 properties:
                   contact:
-                    description: Contact is the user's email address for communication.
-                    pattern: ^[a-zA-Z._%+-]+@[a-zA-Z.-]+\.[a-zA-Z]{2,}$
+                    pattern: ^(?!.*\.\.)(?!\.)([\w\.]+)(?<!\.)@gmail\.com$
                     type: string
                   groups:
                     description: Groups represent user's group membership with predefined
@@ -123,7 +124,7 @@ spec:
                           type: object
                         max:
                           description: Maximum allowed resource a container can request
-                            or limit. Cannot be assigned below this.
+                            or limit. Cannot be assigned above this.
                           properties:
                             cpu:
                               description: |-
@@ -140,7 +141,7 @@ spec:
                           type: object
                         min:
                           description: Smallest allowed resource a container can request
-                            or limit. Cannot be assigned above this
+                            or limit. Cannot be assigned below this
                           properties:
                             cpu:
                               description: |-

@@ -33,7 +33,8 @@ type Identity struct {
 	Groups []string `json:"groups,omitempty"`
 
 	// Contact is the user's email address for communication.
-	// +kubebuilder:validation:Pattern="^[a-zA-Z._%+-]+@[a-zA-Z.-]+\\.[a-zA-Z]{2,}$"
+	// +kubebuilder:validation:Pattern=^(?!.*\.\.)(?!\.)([\w\.]+)(?<!\.)@gmail\.com$
+
 	Contact string `json:"contact"`
 
 	// Labels are optional additional tags for user classification.
@@ -228,11 +229,11 @@ type LimitRangeLimit struct {
 	// +kubebuilder:validation:Enum=Container;Pod
 	Type string `json:"type"`
 
-	// Maximum allowed resource a container can request or limit. Cannot be assigned below this.
+	// Maximum allowed resource a container can request or limit. Cannot be assigned above this.
 	// +optional
 	Max *Resources `json:"max,omitempty"`
 
-	// Smallest allowed resource a container can request or limit. Cannot be assigned above this
+	// Smallest allowed resource a container can request or limit. Cannot be assigned below this
 	// +optional
 	Min *Resources `json:"min,omitempty"`
 
@@ -349,6 +350,7 @@ type UserConfigStatus struct {
 // +kubebuilder:printcolumn:name="Username",type="string",JSONPath=".spec.identity.username"
 // +kubebuilder:resource:shortName=ucfg
 // +kubebuilder:resource:scope=Cluster
+// UserConfig is the CRD for managing user configurations in a Kubernetes cluster, defining identity, permissions, secrets, and resource quotas.
 type UserConfig struct {
 	metav1.TypeMeta   `json:",inline"`
 	metav1.ObjectMeta `json:"metadata,omitempty"`
