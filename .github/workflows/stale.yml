@@ -1,4 +1,10 @@
-name: 7. Schedule Stale PRs and Issues Management
+name: Schedule Stale PRs and Issues Management
+
+permissions:
+  actions: write
+  contents: write
+  issues: write
+  pull-requests: write
 
 on:
   schedule:
@@ -10,29 +16,32 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  call-stale-management:
-    permissions:
-      actions: write
-      contents: write
-      issues: write
-      pull-requests: write
+  stale-management:
+    runs-on: ubuntu-latest
 
-    uses: berrybytes/actions/.github/workflows/stale.yaml@main
-    with:
-      # General settings (apply to both issues and PRs)
-      days-before-stale: '30'
-      days-before-close: '7'
-      operations-per-run: '60'
-      remove-stale-when-updated: 'true'
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-      # PR-specific settings
-      stale-pr-label: 'stale'
-      stale-pr-message: 'This pull request has been marked as stale due to inactivity. It will be closed in 7 days unless further changes are made or a review is requested.'
-      close-pr-message: 'This pull request has been closed due to inactivity. Please feel free to reopen if you think it is still relevant.'
-      exempt-pr-labels: 'WIP,In Progress'
+      - name: Manage Stale Issues and PRs
+        uses: actions/stale@v10.1.0
+        with:
+          repo-token: ${{ github.token }}
 
-      # Issue-specific settings
-      stale-issue-label: 'stale'
-      stale-issue-message: 'This issue has been marked as stale due to inactivity. It will be closed in 7 days unless there is further activity.'
-      close-issue-message: 'This issue has been closed due to inactivity. Please feel free to reopen if you think it is still relevant.'
-      exempt-issue-labels: 'bug,critical,security,high-priority,enhancement,discussion,help wanted,good first issue'
+          # General settings
+          days-before-stale: '30'
+          days-before-close: '7'
+          operations-per-run: '60'
+          remove-stale-when-updated: 'true'
+
+          # Issue-specific settings
+          stale-issue-label: 'stale'
+          stale-issue-message: 'This issue has been marked as stale due to inactivity. It will be closed in 7 days unless there is further activity.'
+          close-issue-message: 'This issue has been closed due to inactivity. Please feel free to reopen if you think it is still relevant.'
+          exempt-issue-labels: 'bug,critical,security,high-priority,enhancement,discussion,help wanted,good first issue'
+
+          # PR-specific settings
+          stale-pr-label: 'stale'
+          stale-pr-message: 'This pull request has been marked as stale due to inactivity. It will be closed in 7 days unless further changes are made or a review is requested.'
+          close-pr-message: 'This pull request has been closed due to inactivity. Please feel free to reopen if you think it is still relevant.'
+          exempt-pr-labels: 'WIP,In Progress'
