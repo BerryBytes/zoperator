@@ -1,0 +1,28 @@
+name: 5. Notification (Github-Event)
+
+
+permissions:
+  issues: write
+  pull-requests: write
+  contents: read
+
+
+on:
+  issues:
+    types: [opened, edited, reopened, closed, assigned, labeled]
+  pull_request:
+    types: [opened, closed, reopened, ready_for_review, review_requested]
+  pull_request_review:
+    types: [submitted, edited, dismissed]
+  issue_comment:
+    types: [created, edited]
+  pull_request_review_comment:
+    types: [created, edited]
+
+jobs:
+  notify:
+    uses: berrybytes/actions/.github/workflows/notifications.yaml@main
+    secrets:
+      SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN }}
+      SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID }}
+      GOOGLE_CHAT_WEBHOOK: ${{ secrets.GOOGLE_CHAT_WEBHOOK }}

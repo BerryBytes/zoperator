@@ -1,0 +1,19 @@
+name: 6. Pre-Commit Check
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+      - 'feat/**'
+      - 'feature/**'
+      - 'test/**'
+      - 'chore/**'
+      - 'fix/**'
+      - 'hotfix/**'
+      - 'docs/**'
+  pull_request:
+    types: [opened, synchronize, reopened]
+jobs:
+  pre-commit-check:
+    uses: berrybytes/actions/.github/workflows/pre-commit.yaml@main
