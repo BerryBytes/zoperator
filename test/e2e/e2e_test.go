@@ -383,7 +383,7 @@ var _ = Describe("Manager", Ordered, func() {
 			err := k8sClient.Create(context.Background(), testUserConfig)
 			Expect(err).NotTo(HaveOccurred(), "Failed to create UserConfig resource via API")
 
-			userConfigNamespace := fmt.Sprintf("%s-namespace", testUserConfig.Name)
+			userConfigNamespace := fmt.Sprintf(testUserConfig.Name)
 
 			By("Verifying the UserConfig resource is created")
 			Eventually(func(g Gomega) {
