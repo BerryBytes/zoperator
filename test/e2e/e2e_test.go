@@ -23,6 +23,7 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	// "testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -433,7 +434,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the LimitRange is created")
 			Eventually(func(g Gomega) {
 				limitRange := &corev1.LimitRange{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-limit-range"}, limitRange)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, limitRange)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get LimitRange")
 				g.Expect(limitRange.Spec.Limits).To(HaveLen(1))
 				limit := limitRange.Spec.Limits[0]
@@ -451,7 +452,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the Role is created")
 			Eventually(func(g Gomega) {
 				role := &rbacv1.Role{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-role"}, role)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, role)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get Role")
 				g.Expect(role.Rules).To(ContainElement(MatchFields(IgnoreExtras, Fields{
 					"Resources": ContainElement("pods"),
@@ -462,7 +463,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the ServiceAccount is created")
 			Eventually(func(g Gomega) {
 				sa := &corev1.ServiceAccount{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-serviceaccount"}, sa)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, sa)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get ServiceAccount")
 				g.Expect(sa.Labels).To(HaveKeyWithValue("app.kubernetes.io/managed-by", "userconfig-operator"))
 			}, 30*time.Second, time.Second).Should(Succeed())
@@ -470,22 +471,22 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the RoleBinding is created")
 			Eventually(func(g Gomega) {
 				roleBinding := &rbacv1.RoleBinding{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-rolebinding"}, roleBinding)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, roleBinding)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get RoleBinding")
 				g.Expect(roleBinding.Subjects).To(ContainElements(
 					MatchFields(IgnoreExtras, Fields{
 						"Kind": Equal("User"),
-						"Name": Equal("test-user"),
+						"Name": Equal(testUserConfig.Name),
 					}),
 					MatchFields(IgnoreExtras, Fields{
 						"Kind":      Equal("ServiceAccount"),
-						"Name":      Equal("test-user-serviceaccount"),
+						"Name":      Equal(testUserConfig.Name),
 						"Namespace": Equal(userConfigNamespace),
 					}),
 				))
 				g.Expect(roleBinding.RoleRef).To(MatchFields(IgnoreExtras, Fields{
 					"Kind":     Equal("Role"),
-					"Name":     Equal("test-user-role"),
+					"Name":     Equal(testUserConfig.Name),
 					"APIGroup": Equal("rbac.authorization.k8s.io"),
 				}))
 			}, 30*time.Second, time.Second).Should(Succeed())
@@ -493,7 +494,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the NetworkPolicy is created")
 			Eventually(func(g Gomega) {
 				netpol := &networkingv1.NetworkPolicy{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-network-policy"}, netpol)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, netpol)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get NetworkPolicy")
 				g.Expect(netpol.Spec.PolicyTypes).To(ContainElements(networkingv1.PolicyTypeIngress, networkingv1.PolicyTypeEgress))
 				g.Expect(netpol.Spec.Ingress).To(BeEmpty(), "Default NetworkPolicy should deny all ingress")
@@ -527,7 +528,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the resourcequota is updated or not")
 			Eventually(func(g Gomega) {
 				resourceQuota := &corev1.ResourceQuota{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "default-resource-quota"}, resourceQuota)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, resourceQuota)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get updated ResourceQuota")
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("pods"), EqualQuantity("10"))) // Updated value
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("cpu"), EqualQuantity("2")))   // Updated value
@@ -548,7 +549,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the LimitRange is updated or not")
 			Eventually(func(g Gomega) {
 				limitRange := &corev1.LimitRange{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-limit-range"}, limitRange)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, limitRange)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get updated LimitRange")
 				g.Expect(limitRange.Spec.Limits).To(HaveLen(1))
 				limit := limitRange.Spec.Limits[0]
@@ -577,7 +578,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the Role is updated or not")
 			Eventually(func(g Gomega) {
 				role := &rbacv1.Role{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-role"}, role)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, role)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get updated Role")
 				g.Expect(role.Rules).To(ContainElement(MatchFields(IgnoreExtras, Fields{
 					"Resources": ContainElement("deployments"), // Updated resource
