@@ -388,7 +388,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the UserConfig resource is created")
 			Eventually(func(g Gomega) {
 				createdUserConfig := &myoperatorv1alpha1.UserConfig{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: "test-user"}, createdUserConfig)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: testUserConfig.Name}, createdUserConfig)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get UserConfig resource")
 				g.Expect(createdUserConfig.Spec.Identity.Username).To(Equal("testuser"))
 			}, 60*time.Second, time.Second).Should(Succeed())
@@ -396,7 +396,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the UserConfig status is updated")
 			Eventually(func(g Gomega) {
 				updatedUserConfig := &myoperatorv1alpha1.UserConfig{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: "test-user"}, updatedUserConfig)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: testUserConfig.Name}, updatedUserConfig)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get UserConfig status")
 				g.Expect(updatedUserConfig.Status.Conditions).To(HaveLen(2), "Status conditions should be present")
 				g.Expect(updatedUserConfig.Status.Conditions[0].Status).To(Equal(metav1.ConditionTrue), "UserConfig status should be True")
@@ -405,7 +405,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the UserConfig resource is reconciled")
 			Eventually(func(g Gomega) {
 				updatedUserConfig := &myoperatorv1alpha1.UserConfig{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: "test-user"}, updatedUserConfig)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: testUserConfig.Name}, updatedUserConfig)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get UserConfig condition")
 				g.Expect(updatedUserConfig.Status.Conditions).To(ContainElement(MatchFields(IgnoreExtras, Fields{
 					"Type":   Equal("Ready"),
@@ -424,7 +424,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the ResourceQuota is created")
 			Eventually(func(g Gomega) {
 				resourceQuota := &corev1.ResourceQuota{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "default-resource-quota"}, resourceQuota)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, resourceQuota)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get ResourceQuota")
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("pods"), EqualQuantity("5")))
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("cpu"), EqualQuantity("1")))
