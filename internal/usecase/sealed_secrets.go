@@ -1,9 +1,10 @@
 package usecase
 
 import (
-	myoperatorv1alpha1 "01cloud/zoperator/api/v1alpha1"
 	"context"
 	"fmt"
+
+	myoperatorv1alpha1 "01cloud/zoperator/api/v1alpha1"
 
 	sealedsecretsv1alpha1 "github.com/bitnami-labs/sealed-secrets/pkg/apis/sealedsecrets/v1alpha1"
 	corev1 "k8s.io/api/core/v1"

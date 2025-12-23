@@ -151,7 +151,6 @@ var _ = Describe("Manager", Ordered, func() {
 		// Register networkingv1 (for NetworkPolicy)
 		err = networkingv1.AddToScheme(s)
 		Expect(err).NotTo(HaveOccurred(), "Failed to register networkingv1 scheme")
-
 	})
 
 	// After all tests have been executed, clean up by undeploying the controller, uninstalling CRDs,
@@ -594,7 +593,6 @@ var _ = Describe("Manager", Ordered, func() {
 					"Resources": ContainElement("pods"), // Updated resource
 					"Verbs":     Not(ContainElements("create")),
 				})))
-
 			}, 30*time.Second, time.Second).Should(Succeed())
 		})
 	})
