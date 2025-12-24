@@ -1,8 +1,9 @@
 package usecase
 
 import (
-	myoperatorv1alpha1 "01cloud/zoperator/api/v1alpha1"
 	"context"
+
+	myoperatorv1alpha1 "01cloud/zoperator/api/v1alpha1"
 
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
