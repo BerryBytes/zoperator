@@ -23,6 +23,8 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+
+	// "testing"
 	"time"
 
 	. "github.com/onsi/ginkgo/v2"
@@ -150,7 +152,6 @@ var _ = Describe("Manager", Ordered, func() {
 		// Register networkingv1 (for NetworkPolicy)
 		err = networkingv1.AddToScheme(s)
 		Expect(err).NotTo(HaveOccurred(), "Failed to register networkingv1 scheme")
-
 	})
 
 	// After all tests have been executed, clean up by undeploying the controller, uninstalling CRDs,
@@ -383,12 +384,12 @@ var _ = Describe("Manager", Ordered, func() {
 			err := k8sClient.Create(context.Background(), testUserConfig)
 			Expect(err).NotTo(HaveOccurred(), "Failed to create UserConfig resource via API")
 
-			userConfigNamespace := fmt.Sprintf("%s-namespace", testUserConfig.Name)
+			userConfigNamespace := fmt.Sprintf(testUserConfig.Name)
 
 			By("Verifying the UserConfig resource is created")
 			Eventually(func(g Gomega) {
 				createdUserConfig := &myoperatorv1alpha1.UserConfig{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: "test-user"}, createdUserConfig)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: testUserConfig.Name}, createdUserConfig)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get UserConfig resource")
 				g.Expect(createdUserConfig.Spec.Identity.Username).To(Equal("testuser"))
 			}, 60*time.Second, time.Second).Should(Succeed())
@@ -396,7 +397,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the UserConfig status is updated")
 			Eventually(func(g Gomega) {
 				updatedUserConfig := &myoperatorv1alpha1.UserConfig{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: "test-user"}, updatedUserConfig)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: testUserConfig.Name}, updatedUserConfig)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get UserConfig status")
 				g.Expect(updatedUserConfig.Status.Conditions).To(HaveLen(2), "Status conditions should be present")
 				g.Expect(updatedUserConfig.Status.Conditions[0].Status).To(Equal(metav1.ConditionTrue), "UserConfig status should be True")
@@ -405,7 +406,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the UserConfig resource is reconciled")
 			Eventually(func(g Gomega) {
 				updatedUserConfig := &myoperatorv1alpha1.UserConfig{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: "test-user"}, updatedUserConfig)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Name: testUserConfig.Name}, updatedUserConfig)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get UserConfig condition")
 				g.Expect(updatedUserConfig.Status.Conditions).To(ContainElement(MatchFields(IgnoreExtras, Fields{
 					"Type":   Equal("Ready"),
@@ -424,7 +425,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the ResourceQuota is created")
 			Eventually(func(g Gomega) {
 				resourceQuota := &corev1.ResourceQuota{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "default-resource-quota"}, resourceQuota)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, resourceQuota)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get ResourceQuota")
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("pods"), EqualQuantity("5")))
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("cpu"), EqualQuantity("1")))
@@ -433,7 +434,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the LimitRange is created")
 			Eventually(func(g Gomega) {
 				limitRange := &corev1.LimitRange{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-limit-range"}, limitRange)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, limitRange)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get LimitRange")
 				g.Expect(limitRange.Spec.Limits).To(HaveLen(1))
 				limit := limitRange.Spec.Limits[0]
@@ -451,7 +452,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the Role is created")
 			Eventually(func(g Gomega) {
 				role := &rbacv1.Role{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-role"}, role)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, role)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get Role")
 				g.Expect(role.Rules).To(ContainElement(MatchFields(IgnoreExtras, Fields{
 					"Resources": ContainElement("pods"),
@@ -462,7 +463,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the ServiceAccount is created")
 			Eventually(func(g Gomega) {
 				sa := &corev1.ServiceAccount{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-serviceaccount"}, sa)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, sa)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get ServiceAccount")
 				g.Expect(sa.Labels).To(HaveKeyWithValue("app.kubernetes.io/managed-by", "userconfig-operator"))
 			}, 30*time.Second, time.Second).Should(Succeed())
@@ -470,22 +471,22 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the RoleBinding is created")
 			Eventually(func(g Gomega) {
 				roleBinding := &rbacv1.RoleBinding{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-rolebinding"}, roleBinding)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, roleBinding)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get RoleBinding")
 				g.Expect(roleBinding.Subjects).To(ContainElements(
 					MatchFields(IgnoreExtras, Fields{
 						"Kind": Equal("User"),
-						"Name": Equal("test-user"),
+						"Name": Equal(testUserConfig.Name),
 					}),
 					MatchFields(IgnoreExtras, Fields{
 						"Kind":      Equal("ServiceAccount"),
-						"Name":      Equal("test-user-serviceaccount"),
+						"Name":      Equal(testUserConfig.Name),
 						"Namespace": Equal(userConfigNamespace),
 					}),
 				))
 				g.Expect(roleBinding.RoleRef).To(MatchFields(IgnoreExtras, Fields{
 					"Kind":     Equal("Role"),
-					"Name":     Equal("test-user-role"),
+					"Name":     Equal(testUserConfig.Name),
 					"APIGroup": Equal("rbac.authorization.k8s.io"),
 				}))
 			}, 30*time.Second, time.Second).Should(Succeed())
@@ -493,7 +494,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the NetworkPolicy is created")
 			Eventually(func(g Gomega) {
 				netpol := &networkingv1.NetworkPolicy{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-network-policy"}, netpol)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, netpol)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get NetworkPolicy")
 				g.Expect(netpol.Spec.PolicyTypes).To(ContainElements(networkingv1.PolicyTypeIngress, networkingv1.PolicyTypeEgress))
 				g.Expect(netpol.Spec.Ingress).To(BeEmpty(), "Default NetworkPolicy should deny all ingress")
@@ -527,7 +528,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the resourcequota is updated or not")
 			Eventually(func(g Gomega) {
 				resourceQuota := &corev1.ResourceQuota{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "default-resource-quota"}, resourceQuota)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, resourceQuota)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get updated ResourceQuota")
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("pods"), EqualQuantity("10"))) // Updated value
 				g.Expect(resourceQuota.Spec.Hard).To(HaveKeyWithValue(corev1.ResourceName("cpu"), EqualQuantity("2")))   // Updated value
@@ -548,7 +549,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the LimitRange is updated or not")
 			Eventually(func(g Gomega) {
 				limitRange := &corev1.LimitRange{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-limit-range"}, limitRange)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, limitRange)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get updated LimitRange")
 				g.Expect(limitRange.Spec.Limits).To(HaveLen(1))
 				limit := limitRange.Spec.Limits[0]
@@ -577,7 +578,7 @@ var _ = Describe("Manager", Ordered, func() {
 			By("Verifying the Role is updated or not")
 			Eventually(func(g Gomega) {
 				role := &rbacv1.Role{}
-				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: "test-user-role"}, role)
+				err := k8sClient.Get(context.Background(), client.ObjectKey{Namespace: userConfigNamespace, Name: testUserConfig.Name}, role)
 				g.Expect(err).NotTo(HaveOccurred(), "Failed to get updated Role")
 				g.Expect(role.Rules).To(ContainElement(MatchFields(IgnoreExtras, Fields{
 					"Resources": ContainElement("deployments"), // Updated resource
@@ -593,7 +594,6 @@ var _ = Describe("Manager", Ordered, func() {
 					"Resources": ContainElement("pods"), // Updated resource
 					"Verbs":     Not(ContainElements("create")),
 				})))
-
 			}, 30*time.Second, time.Second).Should(Succeed())
 		})
 	})
@@ -613,7 +613,7 @@ func serviceAccountToken() (string, error) {
 
 	secretName := fmt.Sprintf("%s-token-request", serviceAccountName)
 	tokenRequestFile := filepath.Join("/tmp", secretName)
-	err := os.WriteFile(tokenRequestFile, []byte(tokenRequestRawString), os.FileMode(0o644))
+	err := os.WriteFile(tokenRequestFile, []byte(tokenRequestRawString), os.FileMode(0644))
 	if err != nil {
 		return "", err
 	}

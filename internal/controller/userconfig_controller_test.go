@@ -177,6 +177,5 @@ var _ = Describe("UserConfig Controller", func() {
 			GinkgoWriter.Printf("Sealed Secret Created, %v\n", secret)
 			Expect(err).NotTo(HaveOccurred())
 		})
-
 	})
 })
