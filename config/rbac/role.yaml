@@ -16,6 +16,7 @@ rules:
   resources:
   - limitranges
   - namespaces
+  - persistentvolume
   - persistentvolumeclaim
   - persistentvolumeclaims
   - persistentvolumes

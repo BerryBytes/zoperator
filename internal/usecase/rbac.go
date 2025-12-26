@@ -237,6 +237,22 @@ func mapActualResource(resource string) string {
 		return "networkpolicies"
 	case "sealedsecret", "sealedsecrets":
 		return "sealedsecrets"
+	case "persistentvolumeclaim", "persistentvolumeclaims":
+		return "persistentvolumeclaims"
+	case "persistentvolume", "persistentvolumes":
+		return "persistentvolumes"
+	case "configmap", "configmaps":
+		return "configmaps"
+	case "persistentvolumeclaim/status", "persistentvolumeclaims/status":
+		return "persistentvolumeclaims/status"
+	case "persistentvolume/status", "persistentvolumes/status":
+		return "persistentvolumes/status"
+	case "resourcequota/status", "resourcequotas/status":
+		return "resourcequotas/status"
+	case "limitrange/status", "limitranges/status":
+		return "limitranges/status"
+	case "serviceaccount/token", "serviceaccounts/token":
+		return "serviceaccounts/token"
 	case "logs":
 		return "pods/log"
 	case "scaledeployment":

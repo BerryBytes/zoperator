@@ -10,6 +10,8 @@ import (
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+
+	myoperatorv1alpha1 "01cloud/zoperator/api/v1alpha1"
 )
 
 func (u *UserConfigUseCase) ReconcileNamespace(ctx context.Context, uc *myoperatorv1alpha1.UserConfig) error {

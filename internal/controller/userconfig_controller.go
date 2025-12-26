@@ -5,20 +5,18 @@ import (
 	"fmt"
 
 	corev1 "k8s.io/api/core/v1"
-
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	ctrl "sigs.k8s.io/controller-runtime"
-
 	"sigs.k8s.io/controller-runtime/pkg/client"
 	"sigs.k8s.io/controller-runtime/pkg/controller/controllerutil"
+	"sigs.k8s.io/controller-runtime/pkg/log"
 	"sigs.k8s.io/controller-runtime/pkg/predicate"
+
+	sealedsecretsv1alpha1 "github.com/bitnami-labs/sealed-secrets/pkg/apis/sealedsecrets/v1alpha1"
 
 	myoperatorv1alpha1 "01cloud/zoperator/api/v1alpha1"
 	usecase "01cloud/zoperator/internal/usecase"
-
-	sealedsecretsv1alpha1 "github.com/bitnami-labs/sealed-secrets/pkg/apis/sealedsecrets/v1alpha1"
-	"sigs.k8s.io/controller-runtime/pkg/log"
 )
 
 // UserConfigReconciler reconciles a UserConfig object
@@ -72,11 +70,15 @@ const (
 // +kubebuilder:rbac:groups=apps,resources=daemonsets/scale,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=statefulsets,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=apps,resources=statefulsets/scale,verbs=get;list;watch;create;update;patch;delete
-// +kubebuilder:rbac:groups=core,resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=persistentvolumeclaim,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups="",resources=persistentvolumeclaim,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups=core,resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
+// +kubebuilder:rbac:groups="",resources=persistentvolumeclaims,verbs=get;list;watch;create;update;patch;delete
 
 // +kubebuilder:rbac:groups=core,resources=persistentvolumeclaims/status,verbs=get;update;patch
+// +kubebuilder:rbac:groups=core,resources=persistentvolume,verbs=get;list;watch;create;update;patch;delete
 // +kubebuilder:rbac:groups=core,resources=persistentvolumes,verbs=get;list;watch;create;update;patch;delete
+
 // +kubebuilder:rbac:groups=core,resources=persistentvolumes/status,verbs=get;update;patch
 
 // Reconcile handles the reconciliation loop for UserConfig resources
